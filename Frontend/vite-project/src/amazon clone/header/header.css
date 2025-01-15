@@ -1,0 +1,117 @@
+.sidenav a,
+.dropdown-btn {
+    padding: 15px 8px 6px 16px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #818181;
+    display: block;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+    transition: .3s ease-in-out;
+}
+
+/* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+.dropdown-container {
+    display: none;
+    background-color: #202630;
+    transition: .3s ease-in-out;
+}
+
+/* Optional: Style the caret down icon */
+.fa-caret-down {
+    float: right;
+    transition: .3s ease-in-out;
+}
+
+.sidebar-header {
+    flex: 0 0 4rem;
+    text-align: left;
+    transition: height .15s, padding .15s;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+.header {
+    background-color: #003036;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: white;
+
+    .dropdown-item i {
+        margin-right: 8px;
+        /* Adjust as needed */
+        transition: .3s ease-in-out;
+    }
+}
+
+.openbtn {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #F5F8F7;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+    scrollbar-color: #F5F8F7 #F5F8F7;
+    scrollbar-width: thin;
+}
+
+.sidenav a {
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover {
+    color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+    font-size: 36px;
+}
+
+.header-nav {
+    list-style: none; /* Removes bullet points */
+    padding: 0; /* Optional: Removes default padding */
+    margin: 0; /* Optional: Removes default margin */
+  }
+  
+  .header-nav .nav-item {
+    margin: 0; /* Ensure no margin around list items */
+    padding: 0; /* Ensure no padding around list items */
+  }
+  
+
+.closebtn {
+    color: black !important;
+    cursor: pointer;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0px 10px;
+}
+
+.searchbar{
+
+    background-color: #00626E;
+    border: none;
+}
+
+::placeholder {
+    color: white;
+    opacity: 1; /* Firefox */
+}
+
