@@ -91,7 +91,9 @@ const Body = () => {
           backgroundColor: 'rgba(75, 192, 192, 0.6)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1,
-          fill: true
+          fill: true,
+          pointRadius: 0,  // Radius of the points (for hover detection)
+          pointHoverRadius: 7  // Radius of the points when hovered
         }
       ],
     };
@@ -105,7 +107,9 @@ const Body = () => {
           backgroundColor: 'rgba(255, 99, 132, 0.6)',
           borderColor: 'rgba(255, 99, 132, 1)',
           borderWidth: 1,
-          fill: true
+          fill: true,
+          pointRadius: 0,  // Radius of the points (for hover detection)
+          pointHoverRadius: 7  // Radius of the points when hovered
         }
       ],
     };
