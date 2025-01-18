@@ -10,7 +10,7 @@ import {
 } from 'chart.js';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
- // Correct import statement
+// Correct import statement
 
 Chart.register(...registerables); // Register all necessary components
 
@@ -70,15 +70,24 @@ const Body = () => {
       }
     }
   }
-  
+
   const processSalesData = (data) => {
     if (!Array.isArray(data) || data.length === 0) {
       console.error('Invalid or empty data received:', data);
       return { mainChart: {}, chartRight: {} };
     }
-  
+
     // Extract dates and values for the charts
-    const dates = data.map((item) => `${item.MONTH} ${item.DAY}, ${item.YEAR}`);
+    const dates = data.map((item) => {
+      const time = new Date(item.Time);
+      if (!isNaN(time.getTime())) { // Check if the date is valid
+        return `${time.toLocaleString('default', { month: 'short' })} ${time.getDate()}, ${item.YEAR}`;
+      } else {
+        console.error('Invalid date:', item.Time);
+        return 'N/A';
+      }
+    });
+
     const orderedProductSales = data.map((item) => item['Ordered product sales']);
     const unitsOrdered = data.map((item) => item['Units ordered']);
 
@@ -91,7 +100,7 @@ const Body = () => {
           backgroundColor: 'rgba(75, 192, 192, 0.6)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1,
-          fill: true,
+          fill: false,
           pointRadius: 0,  // Radius of the points (for hover detection)
           pointHoverRadius: 7  // Radius of the points when hovered
         }
@@ -107,7 +116,7 @@ const Body = () => {
           backgroundColor: 'rgba(255, 99, 132, 0.6)',
           borderColor: 'rgba(255, 99, 132, 1)',
           borderWidth: 1,
-          fill: true,
+          fill: false,
           pointRadius: 0,  // Radius of the points (for hover detection)
           pointHoverRadius: 7  // Radius of the points when hovered
         }
@@ -116,7 +125,8 @@ const Body = () => {
 
     return { mainChart, chartRight };
   };
-  
+
+
   useEffect(() => {
     const ctxLeft = document.getElementById('main-chart').getContext('2d'); // Get canvas context for main-chart
     const ctxRight = document.getElementById('chart-right').getContext('2d'); // Get canvas context for chart-right
@@ -222,71 +232,74 @@ const Body = () => {
   };
 
   const handleFileUpload = async () => {
-    if (!file) {
-      console.error('No file selected');
-      return;
-    }
+  if (!file) {
+    console.error('No file selected');
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append('file', file);
+  const formData = new FormData();
+  formData.append('file', file);
 
-    try {
-      const response = await axios.post('http://localhost:5000/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      console.log('File uploaded successfully:', response.data);
-
-      // Parse the Excel file
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-        // Assuming the first row is headers and the rest are data
-        const headers = json[0];
-        const salesData = json.slice(1).map(row => {
-          const [time, month, year, orderedProductSales, unitsOrdered, ...rest] = row;
-          return {
-            Time: new Date(time), // Convert time to Date object
-            MONTH: month,
-            YEAR: year,
-            DAY: new Date(time).getDate(), // Extract day from the date string
-            'Ordered product sales': orderedProductSales,
-            'Units ordered': unitsOrdered
-          };
-        });
-
-        // Process the sales data
-        const processedData = processSalesData(salesData);
-
-        // Update the chart data state
-        if (processedData) {
-          setChartData(processedData);
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      if (error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Status code:', error.response.status);
-        console.error('Headers:', error.response.headers);
-        alert(`Error uploading file: ${error.response.status} - ${error.response.data.error || error.message}`);
-      } else if (error.request) {
-        console.error('Request:', error.request);
-        alert('Error uploading file: No response received from the server.');
-      } else {
-        console.error('Error:', error.message);
-        alert('Error uploading file: ' + error.message);
+  try {
+    const response = await axios.post('http://localhost:5000/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
       }
-      console.error('Config:', error.config);
+    });
+    console.log('File uploaded successfully:', response.data);
+
+    // Parse the Excel file
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+      // Assuming the first row is headers and the rest are data
+      const headers = json[0];
+      const salesData = json.slice(1).map(row => {
+        const [time, month, year, orderedProductSales, unitsOrdered, ...rest] = row;
+        const date = new Date(time);
+        console.log('Time:', time, 'Parsed Date:', date); // Debug log
+        return {
+          Time: date,
+          MONTH: month,
+          YEAR: year,
+          DAY: date.getDate(), // Extract day from the date string
+          'Ordered product sales': orderedProductSales,
+          'Units ordered': unitsOrdered
+        };
+      });
+
+      // Process the sales data
+      const processedData = processSalesData(salesData);
+
+      // Update the chart data state
+      if (processedData) {
+        setChartData(processedData);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    if (error.response) {
+      console.error('Response data:', error.response.data);
+      console.error('Status code:', error.response.status);
+      console.error('Headers:', error.response.headers);
+      alert(`Error uploading file: ${error.response.status} - ${error.response.data.error || error.message}`);
+    } else if (error.request) {
+      console.error('Request:', error.request);
+      alert('Error uploading file: No response received from the server.');
+    } else {
+      console.error('Error:', error.message);
+      alert('Error uploading file: ' + error.message);
     }
-  };
+    console.error('Config:', error.config);
+  }
+};
+
 
   // Handle applying filters
   const handleApply = () => {
@@ -300,6 +313,20 @@ const Body = () => {
   const handleFileButtonClick = () => {
     fileInputRef.current.click(); // Trigger click on hidden input
   };
+
+  // <------------------for current date in my filter selecter dropdown--------------->
+  const [formattedDate, setFormattedDate] = useState('');
+
+  useEffect(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(today.getDate()).padStart(2, '0');
+
+    const formatted = `${month}/${day}/${year}`;
+    setFormattedDate(formatted);
+  }, []); // Empty dependency array means this effect runs once on mount
+
 
   return (
     <div >
@@ -414,52 +441,52 @@ const Body = () => {
           </div>
         </div>
 
-        <div className='container my-3 p-4' style={{ backgroundColor: '#ebeced', width: '-webkit-fill-available' }}>
+        <div className='container my-3 p-4 py-5' style={{ backgroundColor: '#ebeced', width: '-webkit-fill-available' }}>
           <div className='row d-flex align-items-center mb-3'>
             <div className='col-lg-2'>
               <div className="form-group">
                 <div><h5>Date</h5></div>
                 <select
-                  className="form-select py-2 px-3 rounded-0"
+                  className="form-select py-2 px-3 mb-2 rounded-0"
                   value={selectedFilter}
                   onChange={(e) => setSelectedFilter(e.target.value)}
                 >
                   <option value="">Select a Filter</option>
-                  <option value="1">Today - 12/26/2024</option>
-                  <option value="2">Week to Date - 12/26/2024</option>
-                  <option value="3">Month to Date - 12/26/2024</option>
-                  <option value="4">Year to Date - 12/26/2024</option>
-                  <option value="5">Custom</option>
+                  <option value="1">Today - {formattedDate}</option>
+                  <option value="2">Week to Date - {formattedDate}</option>
+                  <option value="3">Month to Date - {formattedDate}</option>
+                  <option value="4">Year to Date - {formattedDate}</option>
+                  <option value="5" style={{ position: 'relative', top: '-1px' }}>Custom</option>
                 </select>
+                {selectedFilter === '5' && (
+                  <div style={{ position: 'absolute' }} className='d-flex justify-content-between gap-2 align-items-center'>
+                    <div className=''>
+                      <DatePicker
+                        className="form-control py-2 px-3 rounded-0"
+                        id="start-date"
+                        selected={startDate}
+                        onChange={handleStartDateChange}
+                        dateFormat="MM/dd/yyyy"
+                        placeholderText="Select Start Date"
+                      />
+                    </div>
+                    <div className=''>
+                      <DatePicker
+                        className="form-control py-2 px-3 rounded-0"
+                        id="end-date"
+                        selected={endDate}
+                        onChange={handleEndDateChange}
+                        dateFormat="MM/dd/yyyy"
+                        minDate={startDate}
+                        placeholderText="Select End Date"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-            {selectedFilter === '5' && (
-              <>
-                <div className='col-lg-2'>
-                  <DatePicker
-                    className="form-control py-2 px-3 rounded-0"
-                    id="start-date"
-                    selected={startDate}
-                    onChange={handleStartDateChange}
-                    dateFormat="MM/dd/yyyy"
-                    placeholderText="Select Start Date"
-                  />
-                </div>
-                <div className='col-lg-3 col-md-6 col-sm-12'>
-                  <DatePicker
-                    className="form-control py-2 px-3 rounded-0"
-                    id="end-date"
-                    selected={endDate}
-                    onChange={handleEndDateChange}
-                    dateFormat="MM/dd/yyyy"
-                    minDate={startDate}
-                    placeholderText="Select End Date"
-                  />
-                </div>
-              </>
-            )}
             <div className='col-lg-3 col-md-6 col-sm-12'>
-              <div className="form-group">
+              <div className="form-group mb-2">
                 <div><h5>Sales Breakdown</h5></div>
                 <select
                   className="form-select py-2 px-3 no-border rounded-0"
@@ -475,7 +502,7 @@ const Body = () => {
               </div>
             </div>
             <div className='col-lg-3 col-md-6 col-sm-12'>
-              <div className="form-group">
+              <div className="form-group mb-2">
                 <div><h5>Fulfillment channel</h5></div>
                 <select
                   className="form-select py-2 px-3 no-border rounded-0"
