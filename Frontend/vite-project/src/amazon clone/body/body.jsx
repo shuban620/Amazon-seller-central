@@ -77,54 +77,95 @@ const Body = () => {
       return { mainChart: {}, chartRight: {} };
     }
 
-    // Extract dates and values for the charts
-    const dates = data.map((item) => {
-      const time = new Date(item.Time);
-      if (!isNaN(time.getTime())) { // Check if the date is valid
-        return `${time.toLocaleString('default', { month: 'short' })} ${time.getDate()}, ${item.YEAR}`;
-      } else {
-        console.error('Invalid date:', item.Time);
-        return 'N/A';
-      }
-    });
+    // Define static x-axis labels for the charts
+    const xAxisLabels = ['12AM', '1AM', '2AM', '3AM', '4AM', '5AM', '6AM', '7AM', '8AM', '9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM', '5PM', '6PM', '7PM', '8PM', '9PM', '10PM', '11PM'];
 
-    const orderedProductSales = data.map((item) => item['Ordered product sales']);
-    const unitsOrdered = data.map((item) => item['Units ordered']);
+    // Prepare datasets for each graph
+    const orderedProductSalesData1 = data.map(() => Math.random() * 10000); // Replace with actual logic if needed
+    const orderedProductSalesData2 = data.map(() => Math.random() * 10000); // Replace with actual logic if needed
+    const orderedProductSalesData3 = data.map(() => Math.random() * 10000); // Replace with actual logic if needed
+
+    const unitsOrderedData1 = data.map(() => Math.random() * 100); // Replace with actual logic if needed
+    const unitsOrderedData2 = data.map(() => Math.random() * 100); // Replace with actual logic if needed
+    const unitsOrderedData3 = data.map(() => Math.random() * 100); // Replace with actual logic if needed
 
     const mainChart = {
-      labels: dates,
+      labels: xAxisLabels, // Use static labels here
       datasets: [
         {
-          label: 'Ordered Product Sales',
-          data: orderedProductSales,
+          label: 'Ordered Product Sales - 80%',
+          data: orderedProductSalesData1,
           backgroundColor: 'rgba(75, 192, 192, 0.6)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1,
           fill: false,
           pointRadius: 0,  // Radius of the points (for hover detection)
           pointHoverRadius: 7  // Radius of the points when hovered
-        }
+        },
+        {
+          label: 'Ordered Product Sales - 60%',
+          data: orderedProductSalesData2,
+          backgroundColor: 'rgba(255, 206, 86, 0.6)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 1,
+          fill: false,
+          pointRadius: 0,  // Radius of the points (for hover detection)
+          pointHoverRadius: 7  // Radius of the points when hovered
+        },
+        {
+          label: 'Ordered Product Sales - 40%',
+          data: orderedProductSalesData3,
+          backgroundColor: 'rgba(153, 102, 255, 0.6)',
+          borderColor: 'rgba(153, 102, 255, 1)',
+          borderWidth: 1,
+          fill: false,
+          pointRadius: 0,  // Radius of the points (for hover detection)
+          pointHoverRadius: 7  // Radius of the points when hovered
+        },
       ],
     };
 
     const chartRight = {
-      labels: dates,
+      labels: xAxisLabels, // Use static labels here
       datasets: [
         {
-          label: 'Units Ordered',
-          data: unitsOrdered,
+          label: 'Units Ordered - 80%',
+          data: unitsOrderedData1,
           backgroundColor: 'rgba(255, 99, 132, 0.6)',
           borderColor: 'rgba(255, 99, 132, 1)',
           borderWidth: 1,
           fill: false,
           pointRadius: 0,  // Radius of the points (for hover detection)
           pointHoverRadius: 7  // Radius of the points when hovered
-        }
+        },
+        {
+          label: 'Units Ordered - 60%',
+          data: unitsOrderedData2,
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1,
+          fill: false,
+          pointRadius: 0,  // Radius of the points (for hover detection)
+          pointHoverRadius: 7  // Radius of the points when hovered
+        },
+        {
+          label: 'Units Ordered - 40%',
+          data: unitsOrderedData3,
+          backgroundColor: 'rgba(255, 159, 64, 0.6)',
+          borderColor: 'rgba(255, 159, 64, 1)',
+          borderWidth: 1,
+          fill: false,
+          pointRadius: 0,  // Radius of the points (for hover detection)
+          pointHoverRadius: 7  // Radius of the points when hovered
+        },
       ],
     };
 
     return { mainChart, chartRight };
   };
+
+
+
 
 
   useEffect(() => {
@@ -155,12 +196,9 @@ const Body = () => {
         },
         scales: {
           x: {
-            type: 'category',
-            beginAtZero: false,
+            title: { display: true, text: 'Time of Day' },
           },
-          y: {
-            beginAtZero: true,
-          },
+          y: { beginAtZero: true },
         },
       },
     });
@@ -178,15 +216,15 @@ const Body = () => {
         },
         scales: {
           x: {
-            type: 'category',
-            beginAtZero: false,
+            title: { display: true, text: 'Time of Day' },
           },
-          y: {
-            beginAtZero: true,
-          },
+          y: { beginAtZero: true },
         },
       },
     });
+
+
+
 
     // Clean up: Destroy chart instances on component unmount
     return () => {
@@ -232,73 +270,73 @@ const Body = () => {
   };
 
   const handleFileUpload = async () => {
-  if (!file) {
-    console.error('No file selected');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('file', file);
-
-  try {
-    const response = await axios.post('http://localhost:5000/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    console.log('File uploaded successfully:', response.data);
-
-    // Parse the Excel file
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-      // Assuming the first row is headers and the rest are data
-      const headers = json[0];
-      const salesData = json.slice(1).map(row => {
-        const [time, month, year, orderedProductSales, unitsOrdered, ...rest] = row;
-        const date = new Date(time);
-        console.log('Time:', time, 'Parsed Date:', date); // Debug log
-        return {
-          Time: date,
-          MONTH: month,
-          YEAR: year,
-          DAY: date.getDate(), // Extract day from the date string
-          'Ordered product sales': orderedProductSales,
-          'Units ordered': unitsOrdered
-        };
-      });
-
-      // Process the sales data
-      const processedData = processSalesData(salesData);
-
-      // Update the chart data state
-      if (processedData) {
-        setChartData(processedData);
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    if (error.response) {
-      console.error('Response data:', error.response.data);
-      console.error('Status code:', error.response.status);
-      console.error('Headers:', error.response.headers);
-      alert(`Error uploading file: ${error.response.status} - ${error.response.data.error || error.message}`);
-    } else if (error.request) {
-      console.error('Request:', error.request);
-      alert('Error uploading file: No response received from the server.');
-    } else {
-      console.error('Error:', error.message);
-      alert('Error uploading file: ' + error.message);
+    if (!file) {
+      console.error('No file selected');
+      return;
     }
-    console.error('Config:', error.config);
-  }
-};
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post('http://localhost:5000/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log('File uploaded successfully:', response.data);
+
+      // Parse the Excel file
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Assuming the first row is headers and the rest are data
+        const headers = json[0];
+        const salesData = json.slice(1).map(row => {
+          const [time, month, year, orderedProductSales, unitsOrdered, ...rest] = row;
+          const date = new Date(time);
+          console.log('Time:', time, 'Parsed Date:', date); // Debug log
+          return {
+            Time: date,
+            MONTH: month,
+            YEAR: year,
+            DAY: date.getDate(), // Extract day from the date string
+            'Ordered product sales': orderedProductSales,
+            'Units ordered': unitsOrdered
+          };
+        });
+
+        // Process the sales data
+        const processedData = processSalesData(salesData);
+
+        // Update the chart data state
+        if (processedData) {
+          setChartData(processedData);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Status code:', error.response.status);
+        console.error('Headers:', error.response.headers);
+        alert(`Error uploading file: ${error.response.status} - ${error.response.data.error || error.message}`);
+      } else if (error.request) {
+        console.error('Request:', error.request);
+        alert('Error uploading file: No response received from the server.');
+      } else {
+        console.error('Error:', error.message);
+        alert('Error uploading file: ' + error.message);
+      }
+      console.error('Config:', error.config);
+    }
+  };
 
 
   // Handle applying filters
@@ -431,12 +469,12 @@ const Body = () => {
               onClick={handleFileUpload}
               className='px-2'
               style={{ color: '#128399', border: '2px solid #128399', backgroundColor: 'white' }}>
-              Submit
+              Refresh
             </button>
             <button
               onClick={handleFileButtonClick}
               style={{ color: 'white', backgroundColor: ' #128399', border: '2px solid #128399' }}>
-              Upload
+              Download
             </button>
           </div>
         </div>
@@ -609,13 +647,13 @@ const Body = () => {
                   <div><input type="checkbox" name="checkbox" id="" /></div>
                   <div>
                     <div>
-                      <h5 style={{ color: '#97d3de' }}>Today so far</h5>
+                      <h6 style={{ color: '#97d3de' }} className='mb-1'>Today so far</h6>
                     </div>
                     <div>
-                      <p>So far</p>
+                      <p className='mb-1'>So far</p>
                     </div>
                     <div>
-                      <p><span className='fw-bold'>3</span> Units</p>
+                      <p className='mb-1'><span className='fw-bold'>3</span> Units</p>
                     </div>
                     <div>
                       <h5>$23.97</h5>
@@ -628,13 +666,13 @@ const Body = () => {
                   <div><input type="checkbox" name="checkbox" id="" /></div>
                   <div>
                     <div>
-                      <h5 style={{ color: 'red' }}>Yesterday</h5>
+                      <h6 style={{ color: 'red' }} className='mb-1'>Yesterday</h6>
                     </div>
                     <div>
-                      <p>By end of day</p>
+                      <p className='mb-1'>By end of day</p>
                     </div>
                     <div>
-                      <p><span className='fw-bold'>48</span> Units</p>
+                      <p className='mb-1'><span className='fw-bold'>48</span> Units</p>
                     </div>
                     <div>
                       <h5>$398.46</h5>
@@ -647,13 +685,13 @@ const Body = () => {
                   <div><input type="checkbox" name="checkbox" id="" /></div>
                   <div>
                     <div>
-                      <h5 style={{ color: 'orange' }}>Same day last week</h5>
+                      <h6 style={{ color: 'orange' }} className='mb-1'>Same day last week</h6>
                     </div>
                     <div>
-                      <p>By end of day</p>
+                      <p className='mb-1'>By end of day</p>
                     </div>
                     <div>
-                      <p><span className='fw-bold'>33</span> Units</p>
+                      <p className='mb-1'><span className='fw-bold'>33</span> Units</p>
                     </div>
                     <div>
                       <h5>$263.67</h5>
@@ -666,13 +704,13 @@ const Body = () => {
                   <div><input type="checkbox" name="checkbox" id="" /></div>
                   <div>
                     <div>
-                      <h5 style={{ color: 'gray' }}>Same day last year</h5>
+                      <h6 style={{ color: 'gray' }} className='mb-1'>Same day last year</h6>
                     </div>
                     <div>
-                      <p>By end of day</p>
+                      <p className='mb-1'>By end of day</p>
                     </div>
                     <div>
-                      <p><span className='fw-bold'>49</span> Units</p>
+                      <p className='mb-1'><span className='fw-bold mb-1'>49</span> Units</p>
                     </div>
                     <div>
                       <h5>$509.51</h5>
