@@ -617,7 +617,7 @@ const Body = () => {
             </div>
           </div>
         </div>
-        <div className='container border my-3' style={{ width: '-webkit-fill-available' }}>
+        <div className='container border my-3 counter' style={{ width: '-webkit-fill-available' }}>
           <div className='row'>
             <div style={{ backgroundColor: '#fafafa' }} className='col-lg-12 col-md-12 col-sm-12 border-bottom'>
               <div className='d-flex gap-2 align-items-center mb-2 p-2'>
@@ -626,7 +626,7 @@ const Body = () => {
               </div>
             </div>
             <div className='col-lg-12 col-md-12 col-sm-12 d-flex align-items-center mb-3'>
-              <div className='col-lg-2 col-md-4 col-sm-6 p-2'>
+              <div className='col-lg-2 col-md-4 col-sm-6 p-2 counter'>
                 <div>
                   <p>Total Order Items</p>
                 </div>
@@ -634,7 +634,7 @@ const Body = () => {
                   <h5 style={{ overflowWrap: 'anywhere' }}>{totalOrderItems}</h5>
                 </div>
               </div>
-              <div className='col-lg-2 col-md-4 col-sm-6 p-2'>
+              <div className='col-lg-2 col-md-4 col-sm-6 p-2 counter'>
                 <div>
                   <p>Units Ordered</p>
                 </div>
@@ -642,7 +642,7 @@ const Body = () => {
                   <h5 style={{ overflowWrap: 'anywhere' }}>{unitsOrdered}</h5>
                 </div>
               </div>
-              <div className='col-lg-2 col-md-4 col-sm-6 p-2'>
+              <div className='col-lg-2 col-md-4 col-sm-6 p-2 counter'>
                 <div>
                   <p>Ordered Product Sales</p>
                 </div>
@@ -650,7 +650,7 @@ const Body = () => {
                   <h5 style={{ overflowWrap: 'anywhere' }}>${orderedProductSales.toFixed(2)}</h5>
                 </div>
               </div>
-              <div className='col-lg-2 col-md-4 col-sm-6 p-2'>
+              <div className='col-lg-2 col-md-4 col-sm-6 p-2 counter'>
                 <div>
                   <p>Avg. units/order item</p>
                 </div>
@@ -658,7 +658,7 @@ const Body = () => {
                   <h5 style={{ overflowWrap: 'anywhere' }}>{avgUnitsPerOrder.toFixed(2)}</h5>
                 </div>
               </div>
-              <div className='col-lg-2 col-md-4 col-sm-6 p-2'>
+              <div className='col-lg-2 col-md-4 col-sm-6 p-2 counter'>
                 <div>
                   <p>Avg. Sales/ordered items</p>
                 </div>
