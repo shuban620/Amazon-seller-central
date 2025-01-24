@@ -17,6 +17,11 @@ Chart.register(...registerables); // Register all necessary components
 const Body = () => {
   const chartInstanceLeft = useRef(null); // Ref for the first chart (main-chart)
   const chartInstanceRight = useRef(null); // Ref for the second chart (chart-right)
+  const [totalOrderItems, setTotalOrderItems] = useState(0);
+  const [unitsOrdered, setUnitsOrdered] = useState(0);
+  const [orderedProductSales, setOrderedProductSales] = useState(0);
+  const [avgUnitsPerOrder, setAvgUnitsPerOrder] = useState(0);
+  const [avgSalesPerOrder, setAvgSalesPerOrder] = useState(0);
 
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -88,6 +93,20 @@ const Body = () => {
     const unitsOrderedData1 = data.map(() => Math.random() * 100); // Replace with actual logic if needed
     const unitsOrderedData2 = data.map(() => Math.random() * 100); // Replace with actual logic if needed
     const unitsOrderedData3 = data.map(() => Math.random() * 100); // Replace with actual logic if needed
+
+    // Calculate metrics
+    const totalOrders = data.length;
+    const totalUnitsOrdered = data.reduce((sum, item) => sum + (item['Units ordered'] || 0), 0);
+    const totalOrderedProductSales = data.reduce((sum, item) => sum + (item['Ordered product sales'] || 0), 0);
+    const avgUnitsPerOrder = totalOrders ? totalUnitsOrdered / totalOrders : 0;
+    const avgSalesPerOrder = totalOrders ? totalOrderedProductSales / totalOrders : 0;
+
+    // Set state for these metrics
+    setTotalOrderItems(totalOrders);
+    setUnitsOrdered(totalUnitsOrdered);
+    setOrderedProductSales(totalOrderedProductSales);
+    setAvgUnitsPerOrder(avgUnitsPerOrder);
+    setAvgSalesPerOrder(avgSalesPerOrder);
 
     const mainChart = {
       labels: xAxisLabels, // Use static labels here
@@ -184,6 +203,7 @@ const Body = () => {
     console.log('Chart Data:', chartData);
 
     // Create the first Chart instance (main-chart)
+    // Create the first Chart instance (main-chart)
     chartInstanceLeft.current = new Chart(ctxLeft, {
       type: 'line',
       data: chartData.mainChart,
@@ -193,15 +213,32 @@ const Body = () => {
           tooltip: {
             intersect: false,
           },
+          legend: {
+            display: false, // Keep legends if desired, set to false to hide
+          },
         },
         scales: {
           x: {
-            title: { display: true, text: 'Time of Day' },
+            title: {
+              display: false // Set title display to false if you don't want a title for x-axis
+            },
+            grid: {
+              display: false, // Remove the grid lines
+            },
           },
-          y: { beginAtZero: true },
+          y: {
+            title: {
+              display: false // Set title display to false if you don't want a title for y-axis
+            },
+            grid: {
+              display: true, // Only show horizontal lines if needed
+              color: 'rgba(0, 0, 0, 0.1)',  // Optional: adjust line color
+            },
+          },
         },
       },
     });
+
 
     // Create the second Chart instance (chart-right)
     chartInstanceRight.current = new Chart(ctxRight, {
@@ -213,18 +250,31 @@ const Body = () => {
           tooltip: {
             intersect: false,
           },
+          legend: {
+            display: false, // Keep legends if desired, set to false to hide
+          },
         },
         scales: {
           x: {
-            title: { display: true, text: 'Time of Day' },
+            title: {
+              display: false // Set title display to false if you don't want a title for x-axis
+            },
+            grid: {
+              display: false, // Remove the grid lines
+            },
           },
-          y: { beginAtZero: true },
+          y: {
+            title: {
+              display: false // Set title display to false if you don't want a title for y-axis
+            },
+            grid: {
+              display: true, // Only show horizontal lines if needed
+              color: 'rgba(0, 0, 0, 0.1)', // Optional: adjust line color
+            },
+          },
         },
       },
     });
-
-
-
 
     // Clean up: Destroy chart instances on component unmount
     return () => {
@@ -581,7 +631,7 @@ const Body = () => {
                   <p>Total Order Items</p>
                 </div>
                 <div>
-                  <h3>2</h3>
+                  <h5 style={{ overflowWrap: 'anywhere' }}>{totalOrderItems}</h5>
                 </div>
               </div>
               <div className='col-lg-2 col-md-4 col-sm-6 p-2'>
@@ -589,7 +639,7 @@ const Body = () => {
                   <p>Units Ordered</p>
                 </div>
                 <div>
-                  <h3>3</h3>
+                  <h5 style={{ overflowWrap: 'anywhere' }}>{unitsOrdered}</h5>
                 </div>
               </div>
               <div className='col-lg-2 col-md-4 col-sm-6 p-2'>
@@ -597,7 +647,7 @@ const Body = () => {
                   <p>Ordered Product Sales</p>
                 </div>
                 <div>
-                  <h3>$23.97</h3>
+                  <h5 style={{ overflowWrap: 'anywhere' }}>${orderedProductSales.toFixed(2)}</h5>
                 </div>
               </div>
               <div className='col-lg-2 col-md-4 col-sm-6 p-2'>
@@ -605,7 +655,7 @@ const Body = () => {
                   <p>Avg. units/order item</p>
                 </div>
                 <div>
-                  <h3>1.5</h3>
+                  <h5 style={{ overflowWrap: 'anywhere' }}>{avgUnitsPerOrder.toFixed(2)}</h5>
                 </div>
               </div>
               <div className='col-lg-2 col-md-4 col-sm-6 p-2'>
@@ -613,12 +663,13 @@ const Body = () => {
                   <p>Avg. Sales/ordered items</p>
                 </div>
                 <div>
-                  <h3>$11.99</h3>
+                  <h5 style={{ overflowWrap: 'anywhere' }}>${avgSalesPerOrder.toFixed(2)}</h5>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
 
         <div className="container border my-3 p-4 graph-section" style={{ backgroundColor: '#EBF7FF', width: '-webkit-fill-available' }}>
           <div className="d-flex justify-content-between align-items-center">
