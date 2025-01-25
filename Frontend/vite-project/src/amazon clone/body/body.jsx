@@ -22,10 +22,11 @@ const Body = () => {
   const [orderedProductSales, setOrderedProductSales] = useState(0);
   const [avgUnitsPerOrder, setAvgUnitsPerOrder] = useState(0);
   const [avgSalesPerOrder, setAvgSalesPerOrder] = useState(0);
-
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState('1');
+  const [file, setFile] = useState(null);
+  const [formattedDate, setFormattedDate] = useState('');
   const [chartData, setChartData] = useState({
     mainChart: {
       labels: [],
@@ -38,7 +39,6 @@ const Body = () => {
   });
 
   useEffect(() => {
-    fetchSalesData();
   }, [selectedFilter, startDate, endDate]);
 
   async function fetchSalesData() {
@@ -185,8 +185,6 @@ const Body = () => {
 
 
 
-
-
   useEffect(() => {
     const ctxLeft = document.getElementById('main-chart').getContext('2d'); // Get canvas context for main-chart
     const ctxRight = document.getElementById('chart-right').getContext('2d'); // Get canvas context for chart-right
@@ -313,8 +311,6 @@ const Body = () => {
   };
 
   // Handle file upload
-  const [file, setFile] = useState(null);
-
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
@@ -345,54 +341,43 @@ const Body = () => {
         const worksheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        // Assuming the first row is headers and the rest are data
+        // Save the parsed data to state or any required logic
         const headers = json[0];
         const salesData = json.slice(1).map(row => {
           const [time, month, year, orderedProductSales, unitsOrdered, ...rest] = row;
           const date = new Date(time);
-          console.log('Time:', time, 'Parsed Date:', date); // Debug log
           return {
             Time: date,
             MONTH: month,
             YEAR: year,
-            DAY: date.getDate(), // Extract day from the date string
+            DAY: date.getDate(),
             'Ordered product sales': orderedProductSales,
             'Units ordered': unitsOrdered
           };
         });
 
-        // Process the sales data
-        const processedData = processSalesData(salesData);
-
-        // Update the chart data state
-        if (processedData) {
-          setChartData(processedData);
-        }
+        // You could store `salesData` in state if required for further use.
+        // setSalesData(salesData); // Uncomment if you want to set sales data here
       };
       reader.readAsArrayBuffer(file);
     } catch (error) {
       console.error('Error uploading file:', error);
-      if (error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Status code:', error.response.status);
-        console.error('Headers:', error.response.headers);
-        alert(`Error uploading file: ${error.response.status} - ${error.response.data.error || error.message}`);
-      } else if (error.request) {
-        console.error('Request:', error.request);
-        alert('Error uploading file: No response received from the server.');
-      } else {
-        console.error('Error:', error.message);
-        alert('Error uploading file: ' + error.message);
-      }
-      console.error('Config:', error.config);
+      // Handle errors...
     }
   };
 
 
   // Handle applying filters
   const handleApply = () => {
-    fetchSalesData();
+    if (!selectedFilter) {
+      alert('Please select a filter before applying.');
+      return; // Prevent fetch if no filter is selected
+    }
+
+    fetchSalesData(); // Call fetchSalesData only when a valid filter is selected
   };
+
+
 
   // Ref for the file input
   const fileInputRef = useRef(null);
@@ -403,7 +388,6 @@ const Body = () => {
   };
 
   // <------------------for current date in my filter selecter dropdown--------------->
-  const [formattedDate, setFormattedDate] = useState('');
 
   useEffect(() => {
     const today = new Date();
